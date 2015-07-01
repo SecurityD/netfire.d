@@ -1,0 +1,8 @@
+{
+	"name": "netfire.d",
+	"description": "Packet manipulation command line interface (CLI) written in D language. The program embeds Ruby for the interactive mode.",
+	"copyright": "Copyright © 2015, kern_m",
+	"authors": ["Alan Zanatta", "Matthieu Kern", "Maxime Fischer"],
+	"dependencies": {
+	}
+}

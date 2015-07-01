@@ -1,3 +1,13 @@
+## D:
+.dub
+docs.json
+__dummy.html
+*.o
+*.obj
+**/**/dub.selections.json
+__test__library__
+
+## Ruby:
 *.gem
 *.rbc
 /.config
