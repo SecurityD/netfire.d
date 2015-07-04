@@ -1,10 +1,11 @@
-module ruby.ruby;
+module ruby;
 
 import core.stdc.config;
 
 extern (C) {
   /+ ruby.h +/
   alias VALUE = c_ulong;
+  alias ID = c_ulong;
   alias c_long SIGNED_VALUE;
   alias RUBY_DATA_FUNC = void function(void*);
 
@@ -13,6 +14,8 @@ extern (C) {
   void* ruby_options(int argc, char** argv);
   int ruby_executable_node(void *n, int *status);
   int ruby_run_node(void *n);
+
+  void ruby_script(const char* name);
 
   void ruby_init_stack(VALUE*);
 
@@ -24,7 +27,8 @@ extern (C) {
   VALUE rb_define_class_under(VALUE, const char*, VALUE);
   VALUE rb_define_module_under(VALUE, const char*);
 
-  void rb_define_method(VALUE,const char*, VALUE function (VALUE, ...), int);
+  void rb_define_method(VALUE, const char*, VALUE function (VALUE, ...), int);
+  void rb_define_method(VALUE, const char*, VALUE function (int, VALUE*, VALUE), int = -1);
   void rb_define_module_function(VALUE,const char*, VALUE function (), int);
   void rb_define_global_function(const char*, VALUE function (), int);
 
@@ -32,6 +36,8 @@ extern (C) {
   VALUE rb_gv_get(const char*);
   VALUE rb_iv_get(VALUE, const char*);
   VALUE rb_iv_set(VALUE, const char*, VALUE);
+
+  int rb_scan_args(int, const VALUE*, const char*, ...);
 
   VALUE rb_data_object_wrap(VALUE, void*, RUBY_DATA_FUNC, RUBY_DATA_FUNC);
   VALUE rb_data_object_alloc(VALUE, void*, RUBY_DATA_FUNC, RUBY_DATA_FUNC);
@@ -76,14 +82,17 @@ extern (C) {
   extern __gshared VALUE rb_cObject;
 
   enum ruby_special_consts {
-  	RUBY_Qfalse = 0,
-  	RUBY_Qtrue = 2,
-  	RUBY_Qnil = 4,
-  	RUBY_Qundef = 6,
+    RUBY_Qfalse = 0x00,		/* ...0000 0000 */
+    RUBY_Qtrue  = 0x14,		/* ...0001 0100 */
+    RUBY_Qnil   = 0x08,		/* ...0000 1000 */
+    RUBY_Qundef = 0x34,		/* ...0011 0100 */
 
-  	RUBY_IMMEDIATE_MASK = 0x03,
-  	RUBY_FIXNUM_FLAG = 0x01,
-  	RUBY_SYMBOL_FLAG = 0x0e,
+    RUBY_IMMEDIATE_MASK = 0x07,
+    RUBY_FIXNUM_FLAG    = 0x01,	/* ...xxxx xxx1 */
+    RUBY_FLONUM_MASK    = 0x03,
+    RUBY_FLONUM_FLAG    = 0x02,	/* ...xxxx xx10 */
+    RUBY_SYMBOL_FLAG    = 0x0c,	/* ...0000 1100 */
+
   	RUBY_SPECIAL_SHIFT = 8
   }
 
@@ -172,9 +181,67 @@ extern (C) {
 
   alias rb_uint2inum rb_uint_new;
 
+  VALUE rb_str_new(const char*, long);
+  VALUE rb_str_new_cstr(const char*);
+
+  int rb_num2int(VALUE);
+  int rb_fix2int(VALUE);
+  uint rb_num2uint(VALUE);
+  uint rb_fix2uint(VALUE);
+  char *rb_string_value_cstr(VALUE*);
+
+  VALUE rb_funcall(VALUE, ID, int, ...);
+  ID rb_intern(const char*);
+
   /+ intern.h +/
   void rb_define_protected_method(VALUE, const char*, VALUE  function (), int);
   void rb_define_private_method(VALUE, const char*, VALUE  function (), int);
   void rb_define_singleton_method(VALUE, const char*, VALUE function (VALUE, ...), int);
+  void rb_define_singleton_method(VALUE, const char*, VALUE function (int, VALUE*, VALUE), int = -1);
   void rb_obj_call_init(VALUE, int, const VALUE*);
+
+  VALUE rb_ary_new();
+  VALUE rb_ary_new_capa(long capa);
+  VALUE rb_ary_new_from_args(long n, ...);
+  VALUE rb_ary_new_from_values(long n, const VALUE *elts);
+  VALUE rb_ary_tmp_new(long);
+  void rb_ary_free(VALUE);
+  void rb_ary_modify(VALUE);
+  VALUE rb_ary_freeze(VALUE);
+  VALUE rb_ary_shared_with_p(VALUE, VALUE);
+  VALUE rb_ary_aref(int, const VALUE*, VALUE);
+  VALUE rb_ary_subseq(VALUE, long, long);
+  void rb_ary_store(VALUE, long, VALUE);
+  VALUE rb_ary_dup(VALUE);
+  VALUE rb_ary_resurrect(VALUE ary);
+  VALUE rb_ary_to_ary(VALUE);
+  VALUE rb_ary_to_s(VALUE);
+  VALUE rb_ary_cat(VALUE, const VALUE *, long);
+  VALUE rb_ary_push(VALUE, VALUE);
+  VALUE rb_ary_pop(VALUE);
+  VALUE rb_ary_shift(VALUE);
+  VALUE rb_ary_unshift(VALUE, VALUE);
+  VALUE rb_ary_entry(VALUE, long);
+  VALUE rb_ary_each(VALUE);
+  VALUE rb_ary_join(VALUE, VALUE);
+  VALUE rb_ary_reverse(VALUE);
+  VALUE rb_ary_rotate(VALUE, long);
+  VALUE rb_ary_sort(VALUE);
+  VALUE rb_ary_sort_bang(VALUE);
+  VALUE rb_ary_delete(VALUE, VALUE);
+  VALUE rb_ary_delete_at(VALUE, long);
+  VALUE rb_ary_clear(VALUE);
+  VALUE rb_ary_plus(VALUE, VALUE);
+  VALUE rb_ary_concat(VALUE, VALUE);
+  VALUE rb_ary_assoc(VALUE, VALUE);
+  VALUE rb_ary_rassoc(VALUE, VALUE);
+  VALUE rb_ary_includes(VALUE, VALUE);
+  VALUE rb_ary_cmp(VALUE, VALUE);
+  VALUE rb_ary_replace(VALUE copy, VALUE orig);
+  VALUE rb_get_values_at(VALUE, long, int, const VALUE*, VALUE function(VALUE,long));
+  VALUE rb_ary_resize(VALUE ary, long len);
+}
+
+static this() {
+  ruby_init();
 }
