@@ -118,7 +118,23 @@ template rb_ProtocolBinding(Type, StructType, string attr) {
         }
       }
     }
+
+    string toBytes = "static VALUE toBytes(VALUE self, ...) {
+      " ~ StructType.stringof ~ "* ptr = Data_Get_Struct!" ~ StructType.stringof ~ "(self);
+      ubyte[] bytes = ptr." ~ attr ~ ".toBytes;
+      VALUE array = rb_ary_new();
+      foreach(ubyte b; bytes) {
+        rb_ary_push(array, rb_uint_new(b));
+      }
+      return array;
+    }";
+    ret ~= toBytes;
+    classStaticCtor ~= "rb_define_method(singInst, \"toBytes\".toStringz, &toBytes, 0);\n";
+
     classStaticCtor ~= "}";
-    return ret ~ classStaticCtor;
+
+    ret ~= classStaticCtor;
+
+    return ret;
   }
 }

@@ -6,3 +6,5 @@ print arp.osiLayer
 print "\n"
 print arp.senderHwAddr
 print "\n"
+print arp.toBytes
+print "\n"
