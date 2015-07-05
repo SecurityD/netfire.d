@@ -8,3 +8,8 @@ print arp.senderHwAddr
 print "\n"
 print arp.toBytes
 print "\n"
+
+arp2 = ARP.new 0, 0, 0, 0
+arp2.fromBytes(arp.toBytes)
+print arp2.toBytes
+print "\n"

@@ -63,8 +63,12 @@ template rb_ProtocolBinding(Type, StructType, string attr) {
                 ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
                   " ~ StructType.stringof ~ "* ptr = Data_Get_Struct!" ~ StructType.stringof ~ "(self);
                   VALUE tmp = va_arg!VALUE(_argptr);
-                  VALUE val = rb_funcall(tmp, rb_intern(\"pack\"), 1, rb_str_new_cstr(\"c*\"));
-                  ptr." ~ attr ~ "." ~ name ~ " = cast(" ~ (ParameterTypeTuple!symbol[0]).stringof ~ ")fromStringz(rb_string_value_cstr(&val));
+                  VALUE val = Qnil;
+                  ubyte[] array = [];
+                  while ((val = rb_ary_shift(tmp)) != Qnil) {
+                    array ~= cast(ubyte)rb_num2uint(val);
+                  }
+                  ptr." ~ attr ~ "." ~ name ~ " = cast(" ~ (ParameterTypeTuple!symbol[0]).stringof ~ ")array;
                   return self;
                 }";
                 classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "=\".toStringz, &" ~ name ~ "_set, 1);\n";
@@ -130,6 +134,20 @@ template rb_ProtocolBinding(Type, StructType, string attr) {
     }";
     ret ~= toBytes;
     classStaticCtor ~= "rb_define_method(singInst, \"toBytes\".toStringz, &toBytes, 0);\n";
+
+    string fromBytes = "static VALUE fromBytes(VALUE self, ...) {
+      " ~ StructType.stringof ~ "* ptr = Data_Get_Struct!" ~ StructType.stringof ~ "(self);
+      VALUE tmp = va_arg!VALUE(_argptr);
+      VALUE val = Qnil;
+      ubyte[] array = [];
+      while ((val = rb_ary_shift(tmp)) != Qnil) {
+        array ~= cast(ubyte)rb_num2uint(val);
+      }
+      ptr." ~ attr ~ " = to" ~ Type.stringof ~ "(array);
+      return self;
+    }";
+    ret ~= fromBytes;
+    classStaticCtor ~= "rb_define_method(singInst, \"fromBytes\".toStringz, &fromBytes, 1);\n";
 
     classStaticCtor ~= "}";
 
