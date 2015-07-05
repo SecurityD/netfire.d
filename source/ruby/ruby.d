@@ -193,6 +193,14 @@ extern (C) {
   VALUE rb_funcall(VALUE, ID, int, ...);
   ID rb_intern(const char*);
 
+  ID rb_sym2id(VALUE);
+  VALUE rb_id2sym(ID);
+
+  VALUE rb_eval_string(const char *str);
+
+  VALUE rb_require(const char*);
+  VALUE rb_path2class(const char*);
+
   /+ intern.h +/
   void rb_define_protected_method(VALUE, const char*, VALUE  function (), int);
   void rb_define_private_method(VALUE, const char*, VALUE  function (), int);

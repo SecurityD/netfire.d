@@ -3,6 +3,8 @@ module binding.protocols.protocol_binding;
 public import core.vararg;
 public import std.string;
 
+public import vibe.data.json;
+
 public import ruby;
 
 template rb_ProtocolBinding(Type, StructType, string attr) {
@@ -148,6 +150,27 @@ template rb_ProtocolBinding(Type, StructType, string attr) {
     }";
     ret ~= fromBytes;
     classStaticCtor ~= "rb_define_method(singInst, \"fromBytes\".toStringz, &fromBytes, 1);\n";
+
+    string toJson = "static VALUE toJson(VALUE self, ...) {
+      " ~ StructType.stringof ~ "* ptr = Data_Get_Struct!" ~ StructType.stringof ~ "(self);
+      rb_eval_string((\"require 'json'\"));
+      VALUE val = rb_eval_string((\"JSON.parse('\" ~ ptr." ~ attr ~ ".toJson.toString ~ \"')\").toStringz);
+      return val;
+    }";
+    ret ~= toJson;
+    classStaticCtor ~= "rb_define_method(singInst, \"toJson\".toStringz, &toJson, 0);\n";
+
+    string fromJson = "static VALUE fromJson(VALUE self, ...) {
+      " ~ StructType.stringof ~ "* ptr = Data_Get_Struct!" ~ StructType.stringof ~ "(self);
+      VALUE tmp = va_arg!VALUE(_argptr);
+      rb_eval_string((\"require 'json'\"));
+      VALUE val = rb_funcall(rb_path2class(\"JSON\"), rb_intern(\"generate\"), 1, tmp);
+      string json = cast(string)(rb_string_value_cstr(&val).fromStringz);
+      ptr. " ~ attr ~ " = to" ~ Type.stringof ~ "(parseJson(json));
+      return self;
+    }";
+    ret ~= fromJson;
+    classStaticCtor ~= "rb_define_method(singInst, \"fromJson\".toStringz, &fromJson, 1);\n";
 
     classStaticCtor ~= "}";
 

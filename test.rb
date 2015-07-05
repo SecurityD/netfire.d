@@ -13,3 +13,10 @@ arp2 = ARP.new 0, 0, 0, 0
 arp2.fromBytes(arp.toBytes)
 print arp2.toBytes
 print "\n"
+print arp2.toJson
+print "\n"
+
+arp3 = ARP.new 0, 0, 0, 0
+arp3.fromJson(arp2.toJson)
+print arp3.toBytes
+print "\n"
