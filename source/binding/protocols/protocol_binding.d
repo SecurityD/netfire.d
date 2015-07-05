@@ -172,6 +172,13 @@ template rb_ProtocolBinding(Type, StructType, string attr) {
     ret ~= fromJson;
     classStaticCtor ~= "rb_define_method(singInst, \"fromJson\".toStringz, &fromJson, 1);\n";
 
+    string toString = "static VALUE toString(VALUE self, ...) {
+      " ~ StructType.stringof ~ "* ptr = Data_Get_Struct!" ~ StructType.stringof ~ "(self);
+      return rb_str_new_cstr(ptr." ~ attr ~ ".toString.toStringz);
+    }";
+    ret ~= toString;
+    classStaticCtor ~= "rb_define_method(singInst, \"toString\".toStringz, &toString, 0);\n";
+
     classStaticCtor ~= "}";
 
     ret ~= classStaticCtor;
