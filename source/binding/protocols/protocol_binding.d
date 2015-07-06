@@ -20,8 +20,8 @@ template rb_ProtocolBinding(Type) {
 
     string ret = "extern(C) struct " ~ structType ~ " {
       Protocol " ~ protocol ~ ";
-      @property " ~ Type.stringof ~ " " ~ attr ~ "() { return cast(" ~ Type.stringof ~ ")" ~ protocol ~ "; };
-      @property void " ~ attr ~ "(" ~ Type.stringof ~ " data) { " ~ protocol ~ " = cast(Protocol)data; };
+      @property " ~ Type.stringof ~ " " ~ attr ~ "() { return cast(" ~ Type.stringof ~ ")" ~ protocol ~ "; }
+      @property void " ~ attr ~ "(" ~ Type.stringof ~ " data) { " ~ protocol ~ " = cast(Protocol)data; }
 
       static VALUE new_(VALUE cl, ...) {
         " ~ structType ~ "* ptr = new " ~ structType ~ ";
@@ -33,6 +33,7 @@ template rb_ProtocolBinding(Type) {
       static void free(void* p) {
         " ~ Type.stringof ~ " tmp = (cast(" ~ structType ~ "*)p)." ~ attr ~ ";
         delete tmp;
+        delete p;
       }
 
       static VALUE initialize(VALUE self, ...) {
