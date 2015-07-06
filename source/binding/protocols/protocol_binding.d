@@ -13,8 +13,8 @@ template rb_ProtocolBinding(Type) {
   import netload.core.protocol;
 
   public string rb_ProtocolBinding() {
-    string structType = "rb_" ~ Type.stringof;
-    string attr = Type.stringof.toLower;
+    string structType = "rb_" ~ (mangledName!Type);
+    string attr = "attr_" ~ ((mangledName!Type).toLower);
 
     string ret = "extern(C) struct " ~ structType ~ " {
       " ~ Type.stringof ~ " " ~ attr ~ ";
