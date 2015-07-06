@@ -4,5 +4,10 @@
 	"copyright": "Copyright © 2015, kern_m",
 	"authors": ["Alan Zanatta", "Matthieu Kern", "Maxime Fischer"],
 	"dependencies": {
-	}
+		"netload.d": {
+			"version": "~dev",
+			"path": "../netloadD/"
+		}
+	},
+	"libs": [ "ruby" ]
 }

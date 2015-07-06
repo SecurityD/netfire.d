@@ -6,6 +6,7 @@ __dummy.html
 *.obj
 **/**/dub.selections.json
 __test__library__
+netfire.d
 
 ## Ruby:
 *.gem
