@@ -46,8 +46,7 @@ mixin(rb_ProtocolBinding!ICMPv4TimeExceed);
 mixin(rb_ProtocolBinding!ICMPv4ParamProblem);
 mixin(rb_ProtocolBinding!ICMPv4SourceQuench);
 mixin(rb_ProtocolBinding!ICMPv4Redirect);
-//FIXME: manage byte[4][]
-// mixin(rb_ProtocolBinding!ICMPv4RouterAdvert);
+mixin(rb_ProtocolBinding!ICMPv4RouterAdvert);
 mixin(rb_ProtocolBinding!ICMPv4RouterSollicitation);
 
 // IMAP

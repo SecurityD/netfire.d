@@ -185,22 +185,41 @@ template rb_ProtocolBinding(Type) {
                 string tmp = (ParameterTypeTuple!symbol[0]).stringof[0 .. $ - 2];
                 if ((ParameterTypeTuple!symbol[0]).stringof.length > 6 && (ParameterTypeTuple!symbol[0]).stringof[0 .. 6] == "const(")
                   tmp = (ParameterTypeTuple!symbol[0]).stringof[6 .. $ - 3];
-                ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
-                  " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
-                  VALUE tmp = va_arg!VALUE(_argptr);
-                  VALUE val = Qnil;
-                  " ~ (ParameterTypeTuple!symbol[0]).stringof ~ " array;
-                  while ((val = rb_ary_shift(tmp)) != Qnil) {
-                    ubyte[] bytesArray;
-                    VALUE b = Qnil;
-                    while((b = rb_ary_shift(val)) != Qnil) {
-                      bytesArray ~= cast(ubyte)rb_num2uint(b);
+                static if ((ParameterTypeTuple!symbol[0]).stringof[0 .. 6] == "ubyte[") {
+                  ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
+                    " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                    VALUE tmp = va_arg!VALUE(_argptr);
+                    VALUE val = Qnil;
+                    ubyte[][] array;
+                    while ((val = rb_ary_shift(tmp)) != Qnil) {
+                      ubyte[] bytesArray;
+                      VALUE b = Qnil;
+                      while((b = rb_ary_shift(val)) != Qnil) {
+                        bytesArray ~= cast(ubyte)rb_num2uint(b);
+                      }
+                      array ~= bytesArray;
                     }
-                    array ~= to" ~ tmp ~ "(bytesArray);
-                  }
-                  ptr." ~ attr ~ "." ~ name ~ " = array;
-                  return self;
-                }";
+                    ptr." ~ attr ~ "." ~ name ~ " = cast(" ~ (ParameterTypeTuple!symbol[0]).stringof ~ ")array;
+                    return self;
+                  }";
+                } else {
+                  ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
+                    " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                    VALUE tmp = va_arg!VALUE(_argptr);
+                    VALUE val = Qnil;
+                    " ~ (ParameterTypeTuple!symbol[0]).stringof ~ " array;
+                    while ((val = rb_ary_shift(tmp)) != Qnil) {
+                      ubyte[] bytesArray;
+                      VALUE b = Qnil;
+                      while((b = rb_ary_shift(val)) != Qnil) {
+                        bytesArray ~= cast(ubyte)rb_num2uint(b);
+                      }
+                      array ~= to" ~ tmp ~ "(bytesArray);
+                    }
+                    ptr." ~ attr ~ "." ~ name ~ " = array;
+                    return self;
+                  }";
+                }
                 classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "=\".toStringz, &" ~ name ~ "_set, 1);\n";
               } else static if (!is(ParameterTypeTuple!symbol[0] == Protocol)) {
                 ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
@@ -279,21 +298,36 @@ template rb_ProtocolBinding(Type) {
                 classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "\".toStringz, &" ~ name ~ "_get, 0);\n";
               } else static if (isArray!(ReturnType!symbol)) {
                 string tmp = ReturnType!symbol.stringof[0 .. $ - 2];
-                if (ReturnType!symbol.stringof.length > 6 && ReturnType!symbol.stringof[0 .. 6] == "const(")
+                static if (ReturnType!symbol.stringof.length > 6 && ReturnType!symbol.stringof[0 .. 6] == "const(")
                   tmp = ReturnType!symbol.stringof[0 .. $ - 3] ~ ")";
-                ret ~= "static VALUE " ~ name ~ "_get(VALUE self, ...) {
-                  " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
-                  VALUE array = rb_ary_new();
-                  foreach(" ~ tmp ~ " t; ptr." ~ attr ~ "." ~ name ~ ") {
-                    ubyte[] bytes = t.toBytes;
-                    VALUE bytesArray = rb_ary_new();
-                    foreach(ubyte b; bytes) {
-                      rb_ary_push(bytesArray, rb_uint_new(b));
+                static if (ReturnType!symbol.stringof[0 .. 6] == "ubyte[" || (ReturnType!symbol.stringof.length > 6 && ReturnType!symbol.stringof[6 .. 12] == "ubyte[")) {
+                  ret ~= "static VALUE " ~ name ~ "_get(VALUE self, ...) {
+                    " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                    VALUE array = rb_ary_new();
+                    foreach(ubyte[] bytes; ptr." ~ attr ~ "." ~ name ~ ") {
+                      VALUE bytesArray = rb_ary_new();
+                      foreach(ubyte b; bytes) {
+                        rb_ary_push(bytesArray, rb_uint_new(b));
+                      }
+                      rb_ary_push(array, bytesArray);
                     }
-                    rb_ary_push(array, bytesArray);
-                  }
-                  return array;
-                }";
+                    return array;
+                  }";
+                } else {
+                  ret ~= "static VALUE " ~ name ~ "_get(VALUE self, ...) {
+                    " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                    VALUE array = rb_ary_new();
+                    foreach(" ~ tmp ~ " t; ptr." ~ attr ~ "." ~ name ~ ") {
+                      ubyte[] bytes = t.toBytes;
+                      VALUE bytesArray = rb_ary_new();
+                      foreach(ubyte b; bytes) {
+                        rb_ary_push(bytesArray, rb_uint_new(b));
+                      }
+                      rb_ary_push(array, bytesArray);
+                    }
+                    return array;
+                  }";
+                }
                 classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "\".toStringz, &" ~ name ~ "_get, 0);\n";
               } else static if (!is(ReturnType!symbol == Protocol)) {
                 ret ~= "static VALUE " ~ name ~ "_get(VALUE self, ...) {
