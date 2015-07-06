@@ -58,8 +58,7 @@ mixin(rb_ProtocolBinding!IP);
 
 // NTP
 mixin(rb_ProtocolBinding!NTPv0);
-//FIXME: manage arrays
-// mixin(rb_ProtocolBinding!NTPv4);
+mixin(rb_ProtocolBinding!NTPv4);
 
 // POP3
 mixin(rb_ProtocolBinding!POP3);
