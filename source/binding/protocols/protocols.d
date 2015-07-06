@@ -57,8 +57,8 @@ mixin(rb_ProtocolBinding!IMAP);
 mixin(rb_ProtocolBinding!IP);
 
 // NTP
-//FIXME: manage ulong
-// mixin(rb_ProtocolBinding!NTPv0);
+mixin(rb_ProtocolBinding!NTPv0);
+//FIXME: manage arrays
 // mixin(rb_ProtocolBinding!NTPv4);
 
 // POP3

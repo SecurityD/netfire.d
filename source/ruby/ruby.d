@@ -188,6 +188,10 @@ extern (C) {
   int rb_fix2int(VALUE);
   uint rb_num2uint(VALUE);
   uint rb_fix2uint(VALUE);
+  long rb_num2ll(VALUE);
+  ulong rb_num2ull(VALUE);
+  VALUE rb_ll2inum(long);
+  VALUE rb_ull2inum(ulong);
   char *rb_string_value_cstr(VALUE*);
 
   VALUE rb_funcall(VALUE, ID, int, ...);

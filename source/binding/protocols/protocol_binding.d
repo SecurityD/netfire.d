@@ -123,6 +123,22 @@ template rb_ProtocolBinding(Type) {
                   return self;
                 }";
                 classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "=\".toStringz, &" ~ name ~ "_set, 1);\n";
+              } else static if (is(ParameterTypeTuple!symbol[0] == long)) {
+                ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
+                  " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                  VALUE tmp = va_arg!VALUE(_argptr);
+                  ptr." ~ attr ~ "." ~ name ~ " = rb_num2ll(tmp);
+                  return self;
+                }";
+                classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "=\".toStringz, &" ~ name ~ "_set, 1);\n";
+              } else static if (is(ParameterTypeTuple!symbol[0] == ulong)) {
+                ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
+                  " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                  VALUE tmp = va_arg!VALUE(_argptr);
+                  ptr." ~ attr ~ "." ~ name ~ " = rb_num2ull(tmp);
+                  return self;
+                }";
+                classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "=\".toStringz, &" ~ name ~ "_set, 1);\n";
               } else static if (is(ParameterTypeTuple!symbol[0] == bool)) {
                 ret ~= "static VALUE " ~ name ~ "_set(VALUE self, ...) {
                   " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
@@ -194,6 +210,18 @@ template rb_ProtocolBinding(Type) {
                 ret ~= "static VALUE " ~ name ~ "_get(VALUE self, ...) {
                   " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
                   return rb_uint_new(ptr." ~ attr ~ "." ~ name ~ ");
+                }";
+                classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "\".toStringz, &" ~ name ~ "_get, 0);\n";
+              } else static if (is(ReturnType!symbol == long)) {
+                ret ~= "static VALUE " ~ name ~ "_get(VALUE self, ...) {
+                  " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                  return rb_ll2inum(ptr." ~ attr ~ "." ~ name ~ ");
+                }";
+                classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "\".toStringz, &" ~ name ~ "_get, 0);\n";
+              } else static if (is(ReturnType!symbol == ulong)) {
+                ret ~= "static VALUE " ~ name ~ "_get(VALUE self, ...) {
+                  " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+                  return rb_ull2inum(ptr." ~ attr ~ "." ~ name ~ ");
                 }";
                 classStaticCtor ~= "rb_define_method(singInst, \"" ~ name ~ "\".toStringz, &" ~ name ~ "_get, 0);\n";
               } else static if (is(ReturnType!symbol == bool)) {
