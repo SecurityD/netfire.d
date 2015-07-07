@@ -8,16 +8,20 @@ public import vibe.data.json;
 
 public import ruby;
 
+public import netload.core.protocol;
+
 template rb_ProtocolBinding(Type) {
   import std.traits;
-  import netload.core.protocol;
 
   public string rb_ProtocolBinding() {
     string structType = "rb_" ~ (mangledName!Type);
     string attr = "attr_" ~ ((mangledName!Type).toLower);
+    string protocol = "protocol_" ~ ((mangledName!Type).toLower);
 
     string ret = "extern(C) struct " ~ structType ~ " {
-      " ~ Type.stringof ~ " " ~ attr ~ ";
+      Protocol " ~ protocol ~ ";
+      @property " ~ Type.stringof ~ " " ~ attr ~ "() { return cast(" ~ Type.stringof ~ ")" ~ protocol ~ "; }
+      @property void " ~ attr ~ "(" ~ Type.stringof ~ " data) { " ~ protocol ~ " = cast(Protocol)data; }
 
       static VALUE new_(VALUE cl, ...) {
         " ~ structType ~ "* ptr = new " ~ structType ~ ";
@@ -27,7 +31,9 @@ template rb_ProtocolBinding(Type) {
       }
 
       static void free(void* p) {
-        delete (cast(" ~ structType ~ "*)p)." ~ attr ~ ";
+        " ~ Type.stringof ~ " tmp = (cast(" ~ structType ~ "*)p)." ~ attr ~ ";
+        delete tmp;
+        delete p;
       }
 
       static VALUE initialize(VALUE self, ...) {
