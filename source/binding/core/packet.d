@@ -23,6 +23,11 @@ extern(C) struct rb_Packet {
     return self;
   }
 
+  static VALUE getTime(VALUE self, ...) {
+    rb_Packet* ptr = Data_Get_Struct!rb_Packet(self);
+    return rb_str_new_cstr(ptr.packet.time.toString.toStringz);
+  }
+
   static void free(void* p) {
     delete p;
   }
@@ -46,5 +51,6 @@ extern(C) struct rb_Packet {
     rb_define_method(singInst, "initialize".toStringz, &initialize, -1);
     rb_define_method(singInst, "annotation".toStringz, &getAnnotation, 0);
     rb_define_method(singInst, "annotation=".toStringz, &setAnnotation, 1);
+    rb_define_method(singInst, "time".toStringz, &getTime, 0);
   }
 }
