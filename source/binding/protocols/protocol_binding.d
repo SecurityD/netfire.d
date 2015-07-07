@@ -2,6 +2,7 @@ module binding.protocols.protocol_binding;
 
 public import core.vararg;
 public import std.string;
+public import std.array;
 public import std.conv;
 
 public import vibe.data.json;
@@ -17,13 +18,16 @@ template rb_ProtocolBinding(Type) {
     string structType = "rb_" ~ (mangledName!Type);
     string attr = "attr_" ~ ((mangledName!Type).toLower);
     string protocol = "protocol_" ~ ((mangledName!Type).toLower);
+    string typeName = Type.stringof;
+    static if (Type.stringof.indexOf("!") != -1)
+      typeName = Type.stringof.replaceFirst("!", "!(") ~ ")";
 
     string ret = "extern(C) struct " ~ structType ~ " {
       Protocol " ~ protocol ~ ";
       VALUE rb_upperLayer;
       VALUE rb_downLayer;
-      @property " ~ Type.stringof ~ " " ~ attr ~ "() { return cast(" ~ Type.stringof ~ ")" ~ protocol ~ "; }
-      @property void " ~ attr ~ "(" ~ Type.stringof ~ " data) { " ~ protocol ~ " = cast(Protocol)data; }
+      @property " ~ typeName ~ " " ~ attr ~ "() { return cast(" ~ typeName ~ ")" ~ protocol ~ "; }
+      @property void " ~ attr ~ "(" ~ typeName ~ " data) { " ~ protocol ~ " = cast(Protocol)data; }
 
       static VALUE new_(VALUE cl, ...) {
         " ~ structType ~ "* ptr = new " ~ structType ~ ";
@@ -33,14 +37,14 @@ template rb_ProtocolBinding(Type) {
       }
 
       static void free(void* p) {
-        " ~ Type.stringof ~ " tmp = (cast(" ~ structType ~ "*)p)." ~ attr ~ ";
+        " ~ typeName ~ " tmp = (cast(" ~ structType ~ "*)p)." ~ attr ~ ";
         delete tmp;
         delete p;
       }
 
       static VALUE initialize(VALUE self, ...) {
         " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
-        ptr." ~ attr ~ " = new " ~ Type.stringof ~ "();
+        ptr." ~ attr ~ " = new " ~ typeName ~ "();
         ptr.rb_upperLayer = Qnil;
         ptr.rb_downLayer = Qnil;
         return self;
@@ -49,7 +53,7 @@ template rb_ProtocolBinding(Type) {
     string classStaticCtor = "
       static VALUE singInst;
       static this() {
-        singInst = rb_define_class(\"" ~ Type.stringof ~ "\", rb_cObject);
+        singInst = rb_define_class(\"" ~ typeName ~ "\", rb_cObject);
         rb_define_singleton_method(singInst, \"new\".toStringz, &new_, 0);
         rb_define_method(singInst, \"initialize\".toStringz, &initialize, 0);
     ";
@@ -74,7 +78,7 @@ template rb_ProtocolBinding(Type) {
       while ((val = rb_ary_shift(tmp)) != Qnil) {
         array ~= cast(ubyte)rb_num2uint(val);
       }
-      ptr." ~ attr ~ " = cast(" ~ Type.stringof ~ ")(to" ~ Type.stringof ~ "(array));
+      ptr." ~ attr ~ " = cast(" ~ typeName ~ ")(to!(" ~ typeName ~ ")(array));
       return self;
     }";
     ret ~= fromBytes;
@@ -95,7 +99,7 @@ template rb_ProtocolBinding(Type) {
       rb_eval_string((\"require 'json'\"));
       VALUE val = rb_funcall(rb_path2class(\"JSON\"), rb_intern(\"generate\"), 1, tmp);
       string json = cast(string)(rb_string_value_cstr(&val).fromStringz);
-      ptr. " ~ attr ~ " = cast(" ~ Type.stringof ~ ")(to" ~ Type.stringof ~ "(parseJson(json)));
+      ptr. " ~ attr ~ " = cast(" ~ typeName ~ ")(to!(" ~ typeName ~ ")(parseJson(json)));
       return self;
     }";
     ret ~= fromJson;
