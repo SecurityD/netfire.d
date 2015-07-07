@@ -20,6 +20,8 @@ template rb_ProtocolBinding(Type) {
 
     string ret = "extern(C) struct " ~ structType ~ " {
       Protocol " ~ protocol ~ ";
+      VALUE rb_upperLayer;
+      VALUE rb_downLayer;
       @property " ~ Type.stringof ~ " " ~ attr ~ "() { return cast(" ~ Type.stringof ~ ")" ~ protocol ~ "; }
       @property void " ~ attr ~ "(" ~ Type.stringof ~ " data) { " ~ protocol ~ " = cast(Protocol)data; }
 
@@ -39,6 +41,8 @@ template rb_ProtocolBinding(Type) {
       static VALUE initialize(VALUE self, ...) {
         " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
         ptr." ~ attr ~ " = new " ~ Type.stringof ~ "();
+        ptr.rb_upperLayer = Qnil;
+        ptr.rb_downLayer = Qnil;
         return self;
       }
     ";
@@ -103,6 +107,29 @@ template rb_ProtocolBinding(Type) {
     }";
     ret ~= toString;
     classStaticCtor ~= "rb_define_method(singInst, \"toString\".toStringz, &toString, 0);\n";
+
+    string slashOverload = "static VALUE slashOverload(VALUE self, ...) {
+      struct getProtocol {
+        Protocol p;
+        VALUE rb_upperLayer;
+        VALUE rb_downLayer;
+      }
+      VALUE tmp = self;
+      getProtocol* ptr;
+      while (1) {
+        ptr = Data_Get_Struct!getProtocol(tmp);
+        if (ptr.rb_downLayer == Qnil)
+          break;
+        tmp = ptr.rb_downLayer;
+      }
+      VALUE tmp2 = va_arg!VALUE(_argptr);
+      ptr.p.data = (Data_Get_Struct!getProtocol(tmp2)).p;
+      ptr.rb_downLayer = tmp2;
+      (Data_Get_Struct!getProtocol(tmp)).rb_upperLayer = tmp2;
+      return self;
+    }";
+    ret ~= slashOverload;
+    classStaticCtor ~= "rb_define_method(singInst, \"/\".toStringz, &slashOverload, 1);\n";
 
     foreach(name; __traits(allMembers, Type)) {
       static if (__traits(getProtection, mixin("Type." ~ name)) == "public") {
