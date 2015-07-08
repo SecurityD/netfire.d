@@ -11,7 +11,7 @@ public import ruby;
 
 public import netload.core.protocol;
 
-template rb_ProtocolBinding(Type) {
+template rb_ProtocolBinding(Type, string RubyClassName = Type.stringof) {
   import std.traits;
 
   public string rb_ProtocolBinding() {
@@ -53,7 +53,9 @@ template rb_ProtocolBinding(Type) {
     string classStaticCtor = "
       static VALUE singInst;
       static this() {
-        singInst = rb_define_class(\"" ~ typeName ~ "\", rb_cObject);
+        import std.stdio;
+        writeln(\"" ~ RubyClassName ~ "\");
+        singInst = rb_define_class(\"" ~ RubyClassName ~ "\", rb_cObject);
         rb_define_singleton_method(singInst, \"new\".toStringz, &new_, 0);
         rb_define_method(singInst, \"initialize\".toStringz, &initialize, 0);
     ";

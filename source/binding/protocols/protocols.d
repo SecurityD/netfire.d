@@ -11,9 +11,9 @@ mixin(rb_ProtocolBinding!ARP);
 mixin(rb_ProtocolBinding!DHCP);
 
 // DNS
-mixin(rb_ProtocolBinding!DNS);
-mixin(rb_ProtocolBinding!DNSQuery);
-mixin(rb_ProtocolBinding!DNSResource);
+mixin(rb_ProtocolBinding!(DNS, "DNS"));
+mixin(rb_ProtocolBinding!(DNSQuery, "DNSQuery"));
+mixin(rb_ProtocolBinding!(DNSResource, "DNSResource"));
 mixin(rb_ProtocolBinding!DNSQR);
 mixin(rb_ProtocolBinding!DNSRR);
 mixin(rb_ProtocolBinding!DNSSOAResource);
@@ -31,23 +31,23 @@ mixin(rb_ProtocolBinding!Ethernet);
 mixin(rb_ProtocolBinding!HTTP);
 
 // ICMP
-mixin(rb_ProtocolBinding!ICMP);
-mixin(rb_ProtocolBinding!ICMPv4Communication);
-mixin(rb_ProtocolBinding!ICMPv4EchoRequest);
-mixin(rb_ProtocolBinding!ICMPv4EchoReply);
-mixin(rb_ProtocolBinding!ICMPv4Timestamp);
-mixin(rb_ProtocolBinding!ICMPv4TimestampRequest);
-mixin(rb_ProtocolBinding!ICMPv4TimestampReply);
-mixin(rb_ProtocolBinding!ICMPv4InformationRequest);
-mixin(rb_ProtocolBinding!ICMPv4InformationReply);
-mixin(rb_ProtocolBinding!ICMPv4Error);
-mixin(rb_ProtocolBinding!ICMPv4DestUnreach);
-mixin(rb_ProtocolBinding!ICMPv4TimeExceed);
-mixin(rb_ProtocolBinding!ICMPv4ParamProblem);
-mixin(rb_ProtocolBinding!ICMPv4SourceQuench);
-mixin(rb_ProtocolBinding!ICMPv4Redirect);
-mixin(rb_ProtocolBinding!ICMPv4RouterAdvert);
-mixin(rb_ProtocolBinding!ICMPv4RouterSollicitation);
+mixin(rb_ProtocolBinding!(ICMP, "ICMP"));
+mixin(rb_ProtocolBinding!(ICMPv4Communication, "ICMPv4Communication"));
+mixin(rb_ProtocolBinding!(ICMPv4EchoRequest, "ICMPv4EchoRequest"));
+mixin(rb_ProtocolBinding!(ICMPv4EchoReply, "ICMPv4EchoReply"));
+mixin(rb_ProtocolBinding!(ICMPv4Timestamp, "ICMPv4Timestamp"));
+mixin(rb_ProtocolBinding!(ICMPv4TimestampRequest, "ICMPv4TimestampRequest"));
+mixin(rb_ProtocolBinding!(ICMPv4TimestampReply, "ICMPv4TimestampReply"));
+mixin(rb_ProtocolBinding!(ICMPv4InformationRequest, "ICMPv4InformationRequest"));
+mixin(rb_ProtocolBinding!(ICMPv4InformationReply, "ICMPv4InformationReply"));
+mixin(rb_ProtocolBinding!(ICMPv4Error, "ICMPv4Error"));
+mixin(rb_ProtocolBinding!(ICMPv4DestUnreach, "ICMPv4DestUnreach"));
+mixin(rb_ProtocolBinding!(ICMPv4TimeExceed, "ICMPv4TimeExceed"));
+mixin(rb_ProtocolBinding!(ICMPv4ParamProblem, "ICMPv4ParamProblem"));
+mixin(rb_ProtocolBinding!(ICMPv4SourceQuench, "ICMPv4SourceQuench"));
+mixin(rb_ProtocolBinding!(ICMPv4Redirect, "ICMPv4Redirect"));
+mixin(rb_ProtocolBinding!(ICMPv4RouterAdvert, "ICMPv4RouterAdvert"));
+mixin(rb_ProtocolBinding!(ICMPv4RouterSollicitation, "ICMPv4RouterSollicitation"));
 
 // IMAP
 mixin(rb_ProtocolBinding!IMAP);
