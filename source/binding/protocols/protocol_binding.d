@@ -53,8 +53,6 @@ template rb_ProtocolBinding(Type, string RubyClassName = Type.stringof) {
     string classStaticCtor = "
       static VALUE singInst;
       static this() {
-        import std.stdio;
-        writeln(\"" ~ RubyClassName ~ "\");
         singInst = rb_define_class(\"" ~ RubyClassName ~ "\", rb_cObject);
         rb_define_singleton_method(singInst, \"new\".toStringz, &new_, 0);
         rb_define_method(singInst, \"initialize\".toStringz, &initialize, 0);
