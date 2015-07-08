@@ -31,6 +31,8 @@ extern (C) {
   void rb_define_method(VALUE, const char*, VALUE function (int, VALUE*, VALUE), int = -1);
   void rb_define_module_function(VALUE,const char*, VALUE function (), int);
   void rb_define_global_function(const char*, VALUE function (), int);
+  void rb_define_global_function(const char*, VALUE function (VALUE, ...), int);
+  void rb_define_global_function(const char*, VALUE function (int, VALUE*, VALUE), int);
 
   VALUE rb_gv_set(const char*, VALUE);
   VALUE rb_gv_get(const char*);

@@ -77,3 +77,22 @@ mixin(rb_ProtocolBinding!TCP);
 
 // UDP
 mixin(rb_ProtocolBinding!UDP);
+
+extern(C) VALUE fileToProtocol(VALUE self, ...) {
+  struct getProtocol {
+    Protocol p;
+  }
+
+  import netload.core.protocol;
+  VALUE file = va_arg!VALUE(_argptr);
+  string fileName = cast(string)(rb_string_value_cstr(&file).fromStringz);
+  Protocol p = netload.core.protocol.read(fileName);
+  VALUE tmp = rb_eval_string((p.name ~ ".new").toStringz);
+  getProtocol* protocol = Data_Get_Struct!getProtocol(tmp);
+  protocol.p = p;
+  return tmp;
+}
+
+static this() {
+  rb_define_global_function("readProtocol".toStringz, &fileToProtocol, 1);
+}

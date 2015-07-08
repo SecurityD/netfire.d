@@ -135,6 +135,17 @@ template rb_ProtocolBinding(Type) {
     ret ~= slashOverload;
     classStaticCtor ~= "rb_define_method(singInst, \"/\".toStringz, &slashOverload, 1);\n";
 
+    string toFile = "static VALUE toFile(VALUE self, ...) {
+      " ~ structType ~ "* ptr = Data_Get_Struct!" ~ structType ~ "(self);
+      VALUE tmp = va_arg!VALUE(_argptr);
+      string fileName = cast(string)(rb_string_value_cstr(&tmp).fromStringz);
+      import std.file;
+      write(fileName, ptr." ~ attr ~ ".toJson.toPrettyString);
+      return self;
+    }";
+    ret ~= toFile;
+    classStaticCtor ~= "rb_define_method(singInst, \"toFile\".toStringz, &toFile, 1);\n";
+
     foreach(name; __traits(allMembers, Type)) {
       static if (__traits(getProtection, mixin("Type." ~ name)) == "public") {
         foreach(symbol; __traits(getOverloads, Type, name)) {
