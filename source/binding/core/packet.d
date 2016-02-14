@@ -10,6 +10,10 @@ import ruby;
 import netload.core.packet;
 import netload.core.protocol;
 
+/++
+ + A binding to the `Packet` class, see the `Packet` documentation
+ + for further informations.
+ +/
 extern(C) struct rb_Packet {
   Packet packet;
   VALUE rbPacketPtr;

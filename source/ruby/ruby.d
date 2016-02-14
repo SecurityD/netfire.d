@@ -2,6 +2,9 @@ module ruby;
 
 import core.stdc.config;
 
+/++
+ + Ruby binding. See ruby documentation for further informations.
+ +/
 extern (C) {
   /+ ruby.h +/
   alias VALUE = c_ulong;

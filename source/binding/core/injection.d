@@ -9,6 +9,9 @@ import ruby;
 import netload.core.packet;
 import netload.core.protocol;
 
+/++
+ + Inject a packet taken as parameter.
+ +/
 extern(C) VALUE inject(VALUE self, ...) {
   struct getProtocol {
     Protocol p;

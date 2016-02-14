@@ -11,6 +11,9 @@ public import ruby;
 
 public import netload.core.protocol;
 
+/++
+ + Generate a Ruby binding from a D protocol class.
+ +/
 template rb_ProtocolBinding(Type, string RubyClassName = Type.stringof) {
   import std.traits;
 

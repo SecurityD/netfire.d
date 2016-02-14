@@ -9,6 +9,10 @@ import netload.d;
 
 import ruby;
 
+/++
+ + A binding to the `Sniffer` class, see the `Sniffer` documentation
+ + for further informations.
+ +/
 extern (C) struct rb_Sniffer {
   Sniffer sniffer;
 
